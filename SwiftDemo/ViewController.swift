@@ -95,12 +95,14 @@ class ViewController: UIViewController {
         var names = ["Swift", "Arial", "Soga", "Donary"];
         names.sortInPlace();
         let results = names.sort({(firstString:String,secondString:String) -> Bool in return firstString>secondString})
-        print("排序后：\(names),\(results)")
+        let sortResult = names.sort(<)
+        print("排序后：\(names),\(results),\(sortResult)")
         
         
         let myPerson = Person(name: "Gavin")
         print("age is: \(myPerson.simpleDescription())")
         
+        //枚举
         let ace = Rank.King
         print("枚举：\(ace.get_name()), \(Rank.Eight)")
         
@@ -168,7 +170,7 @@ class ViewController: UIViewController {
         switch somePoint {
         case (0, 0):
             print("(0, 0) is at the origin")
-            
+            fallthrough
         case (_, 0):
             print("(somePoint.0), 0) is on the x-axis")
             
@@ -182,9 +184,87 @@ class ViewController: UIViewController {
             print("(\(somePoint.0), \(somePoint.1)) is outside of the box")
         }
         
+        var someInt = 8
+        var otherInt = 29
+        swapTwoValue(&someInt, second: &otherInt)
+         print("交换后：first值为：\(someInt),second值为：\(otherInt)")
+        
+        let containsAVee = containsCharacter("asdfghjkl", charToFind: "k")
+        if containsAVee == true {
+            print("it is have \"k\" ")
+        }
+        
+        var currentValue = -4
+        let mvoeNearerToZero = chooseStepFunction(currentValue>0)
+        while currentValue != 0 {
+            print("\(currentValue)")
+            currentValue = mvoeNearerToZero(currentValue)
+        }
+        print("zero!")
+        
+        traillingFunction()
+        
+        //捕获
+        let incrementByTen = makeIncrementor(forIncrement: 10)
+        let alsoIncrementByTen = incrementByTen
+        print("捕获的结果是：\(incrementByTen()), \(alsoIncrementByTen())")
     }
     
+    //inout形参
+    func swapTwoValue(inout first:Int, inout second:Int){
+        let temp = first
+        first = second
+        second = temp
+    }
     
+    //外部形参
+    func containsCharacter(sourceString:String, charToFind:Character) -> Bool {
+        for char in sourceString.characters{
+            if char == charToFind {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
+    //嵌套函数
+    func chooseStepFunction(backwards:Bool) -> (Int) -> Int {
+        func stepForward(input: Int) -> Int { return input + 1 }
+        func stepBackward(input: Int) -> Int { return input - 1 }
+        
+        return backwards ? stepBackward : stepForward
+    }
+    
+    //Trailling 闭包
+    func traillingFunction(){
+        let digitNames = [0:"Zero",1:"One",2:"Two",3:"Three",4:"Four",5:"Five",6:"Six",7:"Seven",8:"Eight",9:"Nine"]
+        let numbers = [16, 58, 510]
+        
+        let strings = numbers.map{
+            (var number) -> String in
+            var output = ""
+            while number > 0 {
+                output = digitNames[number%10]! + output
+                number /= 10
+            }
+            
+            return output
+        }
+        
+        print("结果是：\(strings)")
+    }
+    
+    //捕获
+    func makeIncrementor(forIncrement amount:Int) -> () -> Int {
+        var runningTotal = 0
+        func incrementor() -> Int {
+            runningTotal += amount
+            return runningTotal
+        }
+        
+        return incrementor
+    }
     
     override func didReceiveMemoryWarning() {
             super.didReceiveMemoryWarning()
