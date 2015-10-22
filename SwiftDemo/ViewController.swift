@@ -22,8 +22,35 @@ class Person {
     }
 }
 
-class ViewController: UIViewController {
+//计算属性
+struct Point { //原点
+    var x = 0.0, y = 0.0
+}
+
+struct Size { //大小
+    var width = 0.0, height = 0.0
+}
+
+struct Rect {//中心点
+    var origin = Point()
+    var size = Size()
     
+    var center: Point {
+        get {
+            let centerX = origin.x + size.width/2
+            let centerY = origin.y + size.height/2
+            return Point(x: centerX, y: centerY)
+        }
+        
+        set(newCenter){
+            origin.x = newCenter.x - size.width/2
+            origin.y = newCenter.y - size.height/2
+        }
+    }
+    
+}
+
+class ViewController: UIViewController {
     //枚举和结构体
     enum Rank: Int{
         case Ace = 1
@@ -49,6 +76,23 @@ class ViewController: UIViewController {
             }
         }
         
+    }
+    
+    //类型属性
+    struct AudioChannel {
+        static let thresholdLevel = 10
+        static var maxInputLevelForAllChannel = 0
+        var currentLevel: Int = 0 {
+            didSet{
+                if currentLevel > AudioChannel.thresholdLevel {
+                    currentLevel = AudioChannel.thresholdLevel //将新电平值设置为上限阀值
+                }
+                
+                if currentLevel > AudioChannel.maxInputLevelForAllChannel {
+                    AudioChannel.maxInputLevelForAllChannel = currentLevel //存储当前电平值作为新的最大输入电平
+                }
+            }
+        }
     }
     
     override func viewDidLoad() {
@@ -208,6 +252,29 @@ class ViewController: UIViewController {
         let incrementByTen = makeIncrementor(forIncrement: 10)
         let alsoIncrementByTen = incrementByTen
         print("捕获的结果是：\(incrementByTen()), \(alsoIncrementByTen())")
+        
+        //计算属性
+        var square = Rect (origin: Point(x: 0.0, y: 0.0), size:Size(width: 10.0, height: 10.0))
+        square.center = Point(x: 15.0, y: 15.0)
+        print("新的原点是：\(square.origin)")
+        
+        //类型属性
+        var leftChannel = AudioChannel()
+        var rightChannel = AudioChannel()
+        
+        leftChannel.currentLevel = 8
+        rightChannel.currentLevel = 12
+        print("左声道：\(leftChannel.currentLevel),\(AudioChannel.maxInputLevelForAllChannel), 右声道：\(rightChannel.currentLevel),\(AudioChannel.maxInputLevelForAllChannel)")
+        
+        //变异
+        var somePoints = Points(x: 2.0, y: 2.0)
+        somePoints.moveByX(2.0, y: 2.0)
+        print("变异后的坐标：\(somePoints.x),\(somePoints.y)")
+        
+        //附属脚本（只读）
+        let threeTimesTable = TimesTable(multiplier: 3)
+        print("3的8倍是：\(threeTimesTable[8])")
+        
     }
     
     //inout形参
@@ -264,6 +331,23 @@ class ViewController: UIViewController {
         }
         
         return incrementor
+    }
+    
+    //变异
+    struct Points {
+        var x = 0.0, y = 0.0
+        mutating func moveByX(deltaX:Double, y deltaY:Double) {
+            x += deltaX
+            y += deltaY
+        }
+    }
+    
+    //附属脚本（读写，只读）
+    struct TimesTable {
+        let multiplier: Int
+        subscript(index: Int) -> Int {
+            return multiplier * index //返回传入整数的N倍
+        }
     }
     
     override func didReceiveMemoryWarning() {
