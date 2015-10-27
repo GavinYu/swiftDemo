@@ -8,6 +8,38 @@
 
 import UIKit
 
+//运算符函数
+struct Vector2D {
+    var x = 0.0, y = 0.0
+}
+
+func + (left: Vector2D, right: Vector2D) -> Vector2D {
+    return Vector2D(x: left.x + right.x, y: left.y + right.y)
+}
+
+prefix func - (vector: Vector2D) -> Vector2D {
+    return Vector2D(x: -vector.x, y: -vector.y)
+}
+//组合赋值运算符
+func += (inout left: Vector2D, right: Vector2D) {
+    left = left + right
+}
+//比较运算符
+func == (left: Vector2D, right: Vector2D) -> Bool {
+    return (left.x == right.x && left.y == right.y)
+}
+
+func != (left: Vector2D, right: Vector2D) -> Bool {
+    return !(left == right)
+}
+
+//自定义运算符
+prefix operator +++ {}
+prefix func +++ (inout vector: Vector2D) -> Vector2D {
+    vector += vector
+    return vector
+}
+
 //对象和类
 class Person {
     var name: String = ""
@@ -50,7 +82,88 @@ struct Rect {//中心点
     
 }
 
+//扩展
+extension Double { //扩展计算型属性
+    var km: Double { return self * 1_000.0 }
+    var  m: Double { return self }
+    var cm: Double { return self / 100.0 }
+    var mm: Double { return self / 1_000.0 }
+    var ft: Double { return self / 3.28084 }
+}
+
+extension Rect { //扩展构造器
+    init(center: Point, size: Size) {
+        let originX = center.x - size.width/2
+        let originY = center.y - size.height/2
+        self.init(origin: Point(x: originX, y: originY), size:size)
+    }
+}
+
+extension Int { //扩展方法
+    func repetitions(task: () -> ()) {
+        for _ in 0..<self {
+            task()
+        }
+    }
+}
+
+extension Int { //扩展修改实例方法
+    mutating func square() {
+        self = self * self
+    }
+}
+
+extension Int { //扩展下标
+    subscript(digitIndex: Int) -> Int {
+        var decimalBase = 1
+        for _ in 0...digitIndex { //???有疑问
+            decimalBase *= 10
+        }
+        
+        return (self / decimalBase) % 10
+    }
+}
+
+extension Character { //扩展嵌套类型
+    enum Kind {
+        case Vowel, Consonant, Other
+    }
+    
+    var kind: Kind {
+        switch String(self).lowercaseString {
+        case "a", "e", "i", "o", "u":
+            return .Vowel
+            
+        case "b", "c", "d", "f", "g", "h", "j", "k", "l", "m","n", "p", "q", "r", "s", "t", "v", "w", "x", "y","z":
+            return .Consonant
+            
+        default:
+            return .Other
+        }
+    }
+}
+
+//协议
+protocol FullyNamed {
+    var fullyName: String {get}
+}
+
+class Startship: FullyNamed {
+    var prefix: String?
+    var name: String
+    init(name: String, prefix: String? = nil) {
+        self.name = name
+        self.prefix = prefix
+    }
+    
+    var fullyName:String{
+        return (prefix != nil ? prefix! + " " : " ") + name
+    }
+}
+
 class ViewController: UIViewController {
+
+
     //枚举和结构体
     enum Rank: Int{
         case Ace = 1
@@ -223,7 +336,7 @@ class ViewController: UIViewController {
             
         case (-2...2, -2...2):
             print("(\(somePoint.0), \(somePoint.1)) is inside the box")
-                
+            
         default:
             print("(\(somePoint.0), \(somePoint.1)) is outside of the box")
         }
@@ -231,7 +344,7 @@ class ViewController: UIViewController {
         var someInt = 8
         var otherInt = 29
         swapTwoValue(&someInt, second: &otherInt)
-         print("交换后：first值为：\(someInt),second值为：\(otherInt)")
+        print("交换后：first值为：\(someInt),second值为：\(otherInt)")
         
         let containsAVee = containsCharacter("asdfghjkl", charToFind: "k")
         if containsAVee == true {
@@ -275,6 +388,36 @@ class ViewController: UIViewController {
         let threeTimesTable = TimesTable(multiplier: 3)
         print("3的8倍是：\(threeTimesTable[8])")
         
+        //类型转换示例
+        typeChangeFunction()
+        
+        //类型嵌套示例
+        typeNestingFunction()
+        
+        //扩展示例
+        extensionFunction()
+        
+        //运算符函数
+        let vector = Vector2D(x: 3.0, y: 1.0)
+        let otherVector = Vector2D(x: 2.0, y: 4.0)
+        let combinedVector = vector + otherVector
+        let alsoPositive = -otherVector
+        print("运算符函数的值是：\(combinedVector), 前置运算符：\(alsoPositive)")
+        //组合赋值运算符
+        var original = Vector2D(x: 3.0, y: 5.0)
+        let vectorToAdd = Vector2D(x: 5.0, y: 3.0)
+        original += vectorToAdd
+        print("组合赋值运算符：\(original)")
+        //比较运算符
+        let twoThree = Vector2D(x: 2.0, y: 3.0)
+        let anotherTwoThree = Vector2D(x: 2.0, y: 3.0)
+        if twoThree == anotherTwoThree {
+            print("这两个常量是相等的")
+        }
+        //自定义运算符
+        var toBeDoubled = Vector2D(x: 1.0, y: 4.0)
+        let afterDoubing = +++toBeDoubled
+        print("自定义运算符是：\(afterDoubing)")
     }
     
     //inout形参
@@ -350,9 +493,123 @@ class ViewController: UIViewController {
         }
     }
     
+    //类型转换
+    class MediaItem {
+        var name: String
+        init(name: String) {
+            self.name = name
+        }
+    }
+    
+    class Movie: MediaItem {
+        var director: String
+        init(name: String, director: String) {
+            self.director = director
+            super.init(name: name)
+        }
+    }
+    
+    class Song: MediaItem {
+        var artist: String
+        init(name: String, artist:String) {
+            self.artist = artist
+            super.init(name: name)
+        }
+    }
+    
+    func typeChangeFunction() {
+        let library = [
+            Movie(name: "Casablanca", director: "Michael Curtiz"),
+            Song(name: "Blue Suede Shoes", artist: "Elvis Presley"),
+            Movie(name: "Citizen Kane", director: "Orson Welles"),
+            Song(name: "The One And Only", artist: "Chesney Hawkes"),
+            Song(name: "Never Gonna Give You Up", artist: "Rick Astley")
+        ]
+        
+        for item in library {
+            print("item is type:\(item)")
+            if let movie = item as? Movie {
+                print("Movie: '\(movie.name)', dir: \(movie.director)")
+            } else if let song = item as? Song {
+                print("Song: '\(song.name)', by \(song.artist)")
+            }
+        }
+    }
+    
+    //类型嵌套实例(扑克游戏：二十一点)
+    struct BlackjackCard {
+        //嵌套定义枚举类型Suit：扑克花色
+        enum Suit: Character {
+            case Spades = "♠", Hearts = "♥", Diamonds = "♦", Clubs = "♣"
+        }
+        //嵌套定义枚举类型Ranks:扑克13张牌
+        enum Ranks: Int {
+            case Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten
+            case Jack, Queen, King, Ace
+            struct Values {
+                let first: Int, second: Int?
+            }
+            var values: Values { //计算属性
+                switch self {
+                case .Ace:
+                    return Values(first: 1, second: 11)
+                    
+                case .Jack, .Queen, .King:
+                    return Values(first: 10, second: nil)
+                    
+                default:
+                    return Values(first: self.rawValue, second: nil)
+                }
+            }
+        }
+        
+        //BlackjackCard 的属性和方法
+        let rank: Ranks, suit: Suit
+        var description: String {  //计算属性
+            var output = "suit is \(suit.rawValue)"
+            output += " value is \(rank.values.first)"
+            if let second = rank.values.second {
+                output += " or \(second)"
+            }
+            
+            return output
+        }
+    }
+    
+    //类型嵌套示例函数
+    func typeNestingFunction() {
+        let theAceOfSpades = BlackjackCard(rank: .Ace, suit: .Spades)
+        print("theAceOfSpades is: \(theAceOfSpades.description)")
+    }
+    
+    //扩展示例函数
+    func extensionFunction() {
+        let oneInch = 25.4.km
+        let threeFeet = 3.ft
+        print("扩展计算型属性：\(oneInch, threeFeet)")
+        
+        let centerRect = Rect (center: Point(x: 4.0, y: 4.0), size: Size(width: 3.0, height: 3.0))
+        print("扩展构造器：原点：(\(centerRect.origin.x),\(centerRect.origin.y)), 大小是：(\(centerRect.size.width),\(centerRect.size.height))")
+        
+        3.repetitions{
+            print("扩展方法：Hello, world!")
+        }
+        
+        var someInt = 3
+        someInt.square()
+        print("扩展修改实例方法：",someInt)
+        
+        print("扩展下标：", 746381295[0])
+        
+    }
+    
+    
+    
+    
+    
     override func didReceiveMemoryWarning() {
-            super.didReceiveMemoryWarning()
-            // Dispose of any resources that can be recreated.
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
     
