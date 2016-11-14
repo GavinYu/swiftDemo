@@ -21,7 +21,7 @@ prefix func - (vector: Vector2D) -> Vector2D {
     return Vector2D(x: -vector.x, y: -vector.y)
 }
 //组合赋值运算符
-func += (inout left: Vector2D, right: Vector2D) {
+func += (left: inout Vector2D, right: Vector2D) {
     left = left + right
 }
 //比较运算符
@@ -34,8 +34,8 @@ func != (left: Vector2D, right: Vector2D) -> Bool {
 }
 
 //自定义运算符
-prefix operator +++ {}
-prefix func +++ (inout vector: Vector2D) -> Vector2D {
+prefix operator +++
+prefix func +++ (vector: inout Vector2D) -> Vector2D {
     vector += vector
     return vector
 }
@@ -100,7 +100,7 @@ extension Rect { //扩展构造器
 }
 
 extension Int { //扩展方法
-    func repetitions(task: () -> ()) {
+    func repetitions(_ task: () -> ()) {
         for _ in 0..<self {
             task()
         }
@@ -126,19 +126,19 @@ extension Int { //扩展下标
 
 extension Character { //扩展嵌套类型
     enum Kind {
-        case Vowel, Consonant, Other
+        case vowel, consonant, other
     }
     
     var kind: Kind {
-        switch String(self).lowercaseString {
+        switch String(self).lowercased() {
         case "a", "e", "i", "o", "u":
-            return .Vowel
+            return .vowel
             
         case "b", "c", "d", "f", "g", "h", "j", "k", "l", "m","n", "p", "q", "r", "s", "t", "v", "w", "x", "y","z":
-            return .Consonant
+            return .consonant
             
         default:
-            return .Other
+            return .other
         }
     }
 }
@@ -166,22 +166,22 @@ class ViewController: UIViewController {
 
     //枚举和结构体
     enum Rank: Int{
-        case Ace = 1
-        case Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten
-        case Jack, Queen, King
+        case ace = 1
+        case two, three, four, five, six, seven, eight, nine, ten
+        case jack, queen, king
         
         func get_name() -> String{
             switch self {
-            case .Ace:
+            case .ace:
                 return "ace"
                 
-            case .Jack:
+            case .jack:
                 return "jack"
                 
-            case .Queen:
+            case .queen:
                 return "queen"
                 
-            case .King:
+            case .king:
                 return "king"
                 
             default:
@@ -236,7 +236,7 @@ class ViewController: UIViewController {
         
         //函数和闭包
         //函数
-        func sumof(numbers:Int...) -> Int {
+        func sumof(_ numbers:Int...) -> Int {
             var sum = 0
             for number in numbers{
                 sum += number
@@ -250,9 +250,9 @@ class ViewController: UIViewController {
         
         //闭包
         var names = ["Swift", "Arial", "Soga", "Donary"];
-        names.sortInPlace();
-        let results = names.sort({(firstString:String,secondString:String) -> Bool in return firstString>secondString})
-        let sortResult = names.sort(<)
+        names.sort();
+        let results = names.sorted(by: {(firstString:String,secondString:String) -> Bool in return firstString>secondString})
+        let sortResult = names.sorted(by: <)
         print("排序后：\(names),\(results),\(sortResult)")
         
         
@@ -260,8 +260,8 @@ class ViewController: UIViewController {
         print("age is: \(myPerson.simpleDescription())")
         
         //枚举
-        let ace = Rank.King
-        print("枚举：\(ace.get_name()), \(Rank.Eight)")
+        let ace = Rank.king
+        print("枚举：\(ace.get_name()), \(Rank.eight)")
         
         //元组
         let http404Error = (404, "Not Found")
@@ -294,11 +294,11 @@ class ViewController: UIViewController {
         print("firstForLoop值：\(firstForLoop) secondeForLoop值：\(secondForLoop)")
         
         //数组的遍历
-        for (index, value) in names.enumerate() {
+        for (index, value) in names.enumerated() {
             print("Item \(index+1): \(value)")
         }
         
-        let deviceMac = UIDevice.currentDevice().identifierForVendor?.UUIDString
+        let deviceMac = UIDevice.current.identifierForVendor?.uuidString
         print("设备的MAC: \(deviceMac)")
         
         let count = 3_000_000_000_000
@@ -421,14 +421,14 @@ class ViewController: UIViewController {
     }
     
     //inout形参
-    func swapTwoValue(inout first:Int, inout second:Int){
+    func swapTwoValue(_ first:inout Int, second:inout Int){
         let temp = first
         first = second
         second = temp
     }
     
     //外部形参
-    func containsCharacter(sourceString:String, charToFind:Character) -> Bool {
+    func containsCharacter(_ sourceString:String, charToFind:Character) -> Bool {
         for char in sourceString.characters{
             if char == charToFind {
                 return true
@@ -439,9 +439,9 @@ class ViewController: UIViewController {
     }
     
     //嵌套函数
-    func chooseStepFunction(backwards:Bool) -> (Int) -> Int {
-        func stepForward(input: Int) -> Int { return input + 1 }
-        func stepBackward(input: Int) -> Int { return input - 1 }
+    func chooseStepFunction(_ backwards:Bool) -> (Int) -> Int {
+        func stepForward(_ input: Int) -> Int { return input + 1 }
+        func stepBackward(_ input: Int) -> Int { return input - 1 }
         
         return backwards ? stepBackward : stepForward
     }
@@ -452,7 +452,8 @@ class ViewController: UIViewController {
         let numbers = [16, 58, 510]
         
         let strings = numbers.map{
-            (var number) -> String in
+            (number) -> String in
+            var number = number
             var output = ""
             while number > 0 {
                 output = digitNames[number%10]! + output
@@ -479,7 +480,7 @@ class ViewController: UIViewController {
     //变异
     struct Points {
         var x = 0.0, y = 0.0
-        mutating func moveByX(deltaX:Double, y deltaY:Double) {
+        mutating func moveByX(_ deltaX:Double, y deltaY:Double) {
             x += deltaX
             y += deltaY
         }
@@ -540,21 +541,21 @@ class ViewController: UIViewController {
     struct BlackjackCard {
         //嵌套定义枚举类型Suit：扑克花色
         enum Suit: Character {
-            case Spades = "♠", Hearts = "♥", Diamonds = "♦", Clubs = "♣"
+            case spades = "♠", hearts = "♥", diamonds = "♦", clubs = "♣"
         }
         //嵌套定义枚举类型Ranks:扑克13张牌
         enum Ranks: Int {
-            case Two = 2, Three, Four, Five, Six, Seven, Eight, Nine, Ten
-            case Jack, Queen, King, Ace
+            case two = 2, three, four, five, six, seven, eight, nine, ten
+            case jack, queen, king, ace
             struct Values {
                 let first: Int, second: Int?
             }
             var values: Values { //计算属性
                 switch self {
-                case .Ace:
+                case .ace:
                     return Values(first: 1, second: 11)
                     
-                case .Jack, .Queen, .King:
+                case .jack, .queen, .king:
                     return Values(first: 10, second: nil)
                     
                 default:
@@ -578,7 +579,7 @@ class ViewController: UIViewController {
     
     //类型嵌套示例函数
     func typeNestingFunction() {
-        let theAceOfSpades = BlackjackCard(rank: .Ace, suit: .Spades)
+        let theAceOfSpades = BlackjackCard(rank: .ace, suit: .spades)
         print("theAceOfSpades is: \(theAceOfSpades.description)")
     }
     
@@ -602,11 +603,7 @@ class ViewController: UIViewController {
         print("扩展下标：", 746381295[0])
         
     }
-    
-    
-    
-    
-    
+  
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
